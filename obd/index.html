@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Renault ve Suzuki OBD Uygulamaları | SRKNTSN</title>
+<meta name="description" content="Renault ve Suzuki araçlar için Android OBD2 uygulamaları: arıza kodları, canlı motor verileri, DPF ve AdBlue takibi. ELM327 Wi-Fi ve Bluetooth adaptörlerle çalışır.">
+<meta property="og:title" content="Renault ve Suzuki OBD Uygulamaları">
+<meta property="og:description" content="Arıza kodlarını telefondan oku, canlı motor verilerini izle. ELM327 adaptörle çalışır.">
+<meta property="og:image" content="https://srkntsn.github.io/obd/img/renault-1.webp">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#06111c">
+<link rel="icon" href="img/renault-icon.webp">
+<style>
+  :root {
+    --bg: #06111c;
+    --bg-2: #0b1b2a;
+    --card: #0f2131;
+    --line: #1f3a4f;
+    --text: #eef6fb;
+    --muted: #9db3c4;
+    --renault: #3fe0ef;
+    --suzuki: #4ff0b4;
+    --amber: #ffbf4a;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 600px at 80% -10%, #0c2c3d 0%, transparent 60%), var(--bg);
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .brand { font-weight: 800; letter-spacing: .5px; }
+  .lang { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .lang button { background: none; border: 0; color: var(--muted); padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--card); color: var(--text); }
+
+  .hero { padding: 40px 0 24px; }
+  .hero h1 { font-size: clamp(30px, 6vw, 52px); line-height: 1.1; margin: 0 0 16px; max-width: 16ch; }
+  .hero p { color: var(--muted); font-size: clamp(16px, 2.4vw, 19px); max-width: 56ch; margin: 0 0 24px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--line); background: var(--bg-2); border-radius: 999px; padding: 6px 12px; font-size: 14px; color: var(--muted); }
+
+  .apps { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); padding: 24px 0; }
+  @media (min-width: 860px) { .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .app { min-width: 0; background: linear-gradient(180deg, var(--card), var(--bg-2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+  .app-head { display: flex; gap: 14px; align-items: center; }
+  .app-head img { width: 64px; height: 64px; border-radius: 16px; }
+  .app h2 { margin: 0; font-size: 22px; line-height: 1.2; }
+  .app .sub { color: var(--muted); font-size: 14px; margin: 2px 0 0; }
+  .app ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .app li { padding-left: 26px; position: relative; }
+  .app li::before { content: ""; position: absolute; left: 4px; top: .6em; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .renault { --accent: var(--renault); }
+  .suzuki { --accent: var(--suzuki); }
+  .shots { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+  .shots img { width: 150px; height: auto; aspect-ratio: 9/16; border-radius: 12px; border: 1px solid var(--line); scroll-snap-align: start; flex: none; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 12px; font-weight: 700; text-decoration: none; border: 0; cursor: pointer; font: inherit; font-weight: 700; }
+  .btn-play { background: var(--accent); color: #04121b; margin-top: auto; }
+  .btn-play:hover { filter: brightness(1.08); }
+
+  section.how { padding: 32px 0; }
+  section h3 { font-size: 26px; margin: 0 0 16px; }
+  .steps { display: grid; gap: 14px; grid-template-columns: 1fr; counter-reset: s; }
+  @media (min-width: 720px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .step { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; counter-increment: s; }
+  .step::before { content: counter(s); display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); font-weight: 800; margin-bottom: 8px; }
+  .step b { display: block; margin-bottom: 4px; }
+  .step span { color: var(--muted); font-size: 15px; }
+
+  .signup { margin: 24px 0 40px; background: linear-gradient(135deg, #0f2a3a, #0b1b2a); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+  .signup p.lead { color: var(--muted); margin: 0 0 18px; max-width: 60ch; }
+  .signup form { display: grid; gap: 12px; max-width: 560px; }
+  .signup label.field { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
+  .signup input[type=email], .signup select { min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); padding: 0 14px; font: inherit; }
+  .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); }
+  .consent input { margin-top: 4px; width: 18px; height: 18px; flex: none; accent-color: var(--suzuki); }
+  .consent a { color: var(--text); }
+  .btn-sub { background: var(--amber); color: #1b1203; }
+  .btn-sub:disabled { opacity: .5; cursor: not-allowed; }
+  .hp { position: absolute; left: -9999px; }
+  .msg { font-size: 15px; min-height: 1.6em; margin: 0; }
+  .msg.ok { color: var(--suzuki); }
+  .msg.err { color: #ff8a8a; }
+
+  footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 13px; }
+  footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">SRKNTSN</div>
+    <div class="lang" role="group" aria-label="Dil / Language">
+      <button type="button" data-lang="tr" aria-pressed="true">TR</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 data-i18n="hero_title">Arıza lambası yandı mı? Nedenini telefonundan öğren.</h1>
+    <p data-i18n="hero_text">Renault ve Suzuki araçlar için hazırlanmış iki Android uygulaması. Ucuz bir ELM327 adaptörü OBD soketine tak, arıza kodlarını oku ve motor verilerini canlı izle.</p>
+    <div class="chips">
+      <span class="chip">ELM327 Wi-Fi</span>
+      <span class="chip">ELM327 Bluetooth</span>
+      <span class="chip" data-i18n="chip_codes">Arıza kodları</span>
+      <span class="chip" data-i18n="chip_live">Canlı veri</span>
+      <span class="chip">Android</span>
+    </div>
+  </section>
+
+  <div class="apps">
+    <article class="app renault">
+      <div class="app-head">
+        <img src="img/renault-icon.webp" alt="" width="64" height="64">
+        <div>
+          <h2>OBD Diagnostics for Renault</h2>
+          <p class="sub" data-i18n="renault_sub">Renault ve Dacia, dCi motorlar</p>
+        </div>
+      </div>
+      <ul>
+        <li data-i18n="renault_f1">Arıza kodlarını oku, açıklamalarıyla gör</li>
+        <li data-i18n="renault_f2">DPF kurum, sıcaklık ve rejenerasyon takibi</li>
+        <li data-i18n="renault_f3">AdBlue seviyesi ve uyarıları</li>
+        <li data-i18n="renault_f4">Sesli uyarılar ve sürüş sırasında HUD modu</li>
+      </ul>
+      <div class="shots">
+        <img src="img/renault-1.webp" alt="DPF" loading="lazy" width="450" height="800">
+        <img src="img/renault-2.webp" alt="AdBlue" loading="lazy" width="450" height="800">
+        <img src="img/renault-3.webp" alt="DTC" loading="lazy" width="450" height="800">
+      </div>
+      <a class="btn btn-play" data-play="com.autodiag.renaultobd" href="https://play.google.com/store/apps/details?id=com.autodiag.renaultobd" target="_blank" rel="noopener" data-i18n="play_btn">Google Play'den indir</a>
+    </article>
+
+    <article class="app suzuki">
+      <div class="app-head">
+        <img src="img/suzuki-icon.webp" alt="" width="64" height="64">
+        <div>
+          <h2>Suzuki OBD Diagnostics</h2>
+          <p class="sub" data-i18n="suzuki_sub">SX4, Vitara, Swift, Grand Vitara ve hibrit modeller</p>
+        </div>
+      </div>
+      <ul>
+        <li data-i18n="suzuki_f1">Motor devri, sıcaklık, yük gibi verileri anlık izle</li>
+        <li data-i18n="suzuki_f2">Hibrit sistem verileri</li>
+        <li data-i18n="suzuki_f3">Modüllerde UDS taraması</li>
+        <li data-i18n="suzuki_f4">Türkçe arıza kodu açıklamaları ve bağlantı raporu</li>
+      </ul>
+      <div class="shots">
+        <img src="img/suzuki-1.webp" alt="Live data" loading="lazy" width="450" height="800">
+        <img src="img/suzuki-2.webp" alt="Hybrid" loading="lazy" width="450" height="800">
+        <img src="img/suzuki-3.webp" alt="UDS" loading="lazy" width="450" height="800">
+      </div>
+      <a class="btn btn-play" data-play="com.suzukisx4.obd" href="https://play.google.com/store/apps/details?id=com.suzukisx4.obd" target="_blank" rel="noopener" data-i18n="play_btn">Google Play'den indir</a>
+    </article>
+  </div>
+
+  <section class="how">
+    <h3 data-i18n="how_title">Nasıl çalışır?</h3>
+    <div class="steps">
+      <div class="step"><b data-i18n="s1_t">Adaptörü tak</b><span data-i18n="s1_d">ELM327 adaptörü direksiyonun altındaki OBD soketine tak ve kontağı aç.</span></div>
+      <div class="step"><b data-i18n="s2_t">Bağlan</b><span data-i18n="s2_d">Uygulamayı aç, Wi-Fi ya da Bluetooth ile adaptöre bağlan.</span></div>
+      <div class="step"><b data-i18n="s3_t">Oku ve izle</b><span data-i18n="s3_d">Arıza kodlarını oku, canlı verileri izle, raporu kaydet.</span></div>
+    </div>
+  </section>
+
+  <section class="signup" id="haber">
+    <h3 data-i18n="sub_title">Yeni özelliklerden haberdar ol</h3>
+    <p class="lead" data-i18n="sub_lead">Ayda en fazla iki mail: yeni araç desteği, güncellemeler ve kullanım ipuçları. İstediğin an tek tıkla ayrılabilirsin.</p>
+    <form id="signup-form" novalidate>
+      <label class="field"><span data-i18n="f_email">E-posta adresin</span>
+        <input type="email" name="EMAIL" autocomplete="email" required placeholder="ornek@mail.com">
+      </label>
+      <label class="field"><span data-i18n="f_brand">Aracının markası</span>
+        <select name="MARKA">
+          <option value="Renault">Renault / Dacia</option>
+          <option value="Suzuki">Suzuki</option>
+          <option value="Diger" data-i18n="f_other">Diğer</option>
+        </select>
+      </label>
+      <input class="hp" type="text" name="email_address_check" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <input type="hidden" name="locale" value="tr">
+      <label class="consent">
+        <input type="checkbox" name="OPT_IN" value="1" required>
+        <span data-i18n-html="f_consent">SRKNTSN'nin OBD uygulamalarıyla ilgili tanıtım ve bilgilendirme e-postaları göndermesine onay veriyorum. <a href="kvkk.html">Aydınlatma metnini</a> okudum.</span>
+      </label>
+      <button class="btn btn-sub" type="submit" data-i18n="f_submit">Kaydol</button>
+      <p class="msg" id="signup-msg" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <footer>
+    <p data-i18n="disclaimer">Bu uygulamalar bağımsızdır. Renault Group veya Suzuki Motor Corporation ile bağlantılı değildir, onlar tarafından onaylanmamış ya da desteklenmemiştir. Marka adları yalnızca araç uyumluluğunu belirtmek için kullanılmıştır.</p>
+    <p><a href="kvkk.html" data-i18n="privacy_link">Aydınlatma metni</a> · <a href="https://srkntsn.github.io/renault-obd/privacy_policy.html">Renault app privacy</a> · <a href="https://srkntsn.github.io/">SRKNTSN</a></p>
+  </footer>
+</div>
+
+<script>
+  // Brevo > Kişiler > Formlar > (form) > Paylaş > "HTML kodu" içindeki <form action="..."> adresi.
+  // Boş kaldığı sürece form gönderim yapmaz.
+  const BREVO_FORM_URL = "";
+
+  const I18N = {
+    en: {
+      hero_title: "Check engine light on? Find out why on your phone.",
+      hero_text: "Two Android apps built for Renault and Suzuki cars. Plug a low-cost ELM327 adapter into the OBD port, read fault codes and watch engine data live.",
+      chip_codes: "Fault codes",
+      chip_live: "Live data",
+      renault_sub: "Renault and Dacia, dCi engines",
+      renault_f1: "Read fault codes with descriptions",
+      renault_f2: "DPF soot, temperature and regeneration tracking",
+      renault_f3: "AdBlue level and warnings",
+      renault_f4: "Voice alerts and a HUD mode for driving",
+      suzuki_sub: "SX4, Vitara, Swift, Grand Vitara and hybrid models",
+      suzuki_f1: "Watch RPM, temperature, load and more live",
+      suzuki_f2: "Hybrid system data",
+      suzuki_f3: "UDS scan across modules",
+      suzuki_f4: "Fault code descriptions and a connection report",
+      play_btn: "Get it on Google Play",
+      how_title: "How it works",
+      s1_t: "Plug in the adapter",
+      s1_d: "Plug the ELM327 adapter into the OBD port under the steering wheel and turn the ignition on.",
+      s2_t: "Connect",
+      s2_d: "Open the app and connect to the adapter over Wi-Fi or Bluetooth.",
+      s3_t: "Read and watch",
+      s3_d: "Read fault codes, watch live data, save the report.",
+      sub_title: "Hear about new features",
+      sub_lead: "Two emails a month at most: new vehicle support, updates and tips. Unsubscribe any time with one click.",
+      f_email: "Your email",
+      f_brand: "Your car's brand",
+      f_other: "Other",
+      f_consent: "I agree to receive promotional and informational emails from SRKNTSN about its OBD apps. I have read the <a href=\"kvkk.html?lang=en\">privacy notice</a>.",
+      f_submit: "Sign up",
+      disclaimer: "These apps are independent. They are not affiliated with, endorsed by or sponsored by Renault Group or Suzuki Motor Corporation. Brand names are used only to describe vehicle compatibility.",
+      privacy_link: "Privacy notice",
+      m_off: "Sign-up is not open yet.",
+      m_email: "Please enter a valid email address.",
+      m_consent: "Please tick the consent box to sign up.",
+      m_ok: "Almost done: open the email we just sent and confirm your address.",
+      m_err: "Something went wrong. Please try again later.",
+      m_confirmed: "Thanks, your email is confirmed. Your first email is on its way."
+    },
+    tr: {
+      m_off: "Kayıt henüz açılmadı.",
+      m_email: "Geçerli bir e-posta adresi gir.",
+      m_consent: "Kaydolmak için onay kutusunu işaretle.",
+      m_ok: "Neredeyse tamam: az önce gönderdiğimiz maili aç ve adresini onayla.",
+      m_err: "Bir sorun oldu. Biraz sonra tekrar dene.",
+      m_confirmed: "Teşekkürler, adresin onaylandı. İlk mailin yolda."
+    }
+  };
+
+  // Türkçe metinler HTML'de duruyor; ilk yüklemede saklanır, dil değişince geri yüklenir.
+  document.querySelectorAll("[data-i18n],[data-i18n-html]").forEach(el => {
+    const key = el.dataset.i18n || el.dataset.i18nHtml;
+    if (!(key in I18N.tr)) I18N.tr[key] = el.dataset.i18nHtml ? el.innerHTML : el.textContent;
+  });
+
+  let lang = "tr";
+  const t = key => (I18N[lang] && I18N[lang][key]) || I18N.tr[key];
+
+  function setLang(next) {
+    lang = next === "en" ? "en" : "tr";
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+    document.querySelector("input[name=locale]").value = lang;
+    document.title = lang === "en"
+      ? "Renault and Suzuki OBD Apps | SRKNTSN"
+      : "Renault ve Suzuki OBD Uygulamaları | SRKNTSN";
+    try { localStorage.setItem("lang", lang); } catch (e) {}
+  }
+
+  document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+  const params = new URLSearchParams(location.search);
+  let saved = null;
+  try { saved = localStorage.getItem("lang"); } catch (e) {}
+  setLang(params.get("lang") || saved || ((navigator.language || "tr").toLowerCase().startsWith("tr") ? "tr" : "en"));
+
+  // Paylaşım linkindeki utm_source, Play Console'daki edinme raporunda görünsün diye Play linkine aktarılır.
+  const source = params.get("utm_source") || "landing";
+  const campaign = params.get("utm_campaign") || "obd_landing";
+  const referrer = encodeURIComponent(`utm_source=${source}&utm_medium=web&utm_campaign=${campaign}`);
+  document.querySelectorAll("a[data-play]").forEach(a => {
+    a.href = `https://play.google.com/store/apps/details?id=${a.dataset.play}&referrer=${referrer}`;
+  });
+
+  const form = document.getElementById("signup-form");
+  const msg = document.getElementById("signup-msg");
+  const show = (key, ok) => { msg.textContent = t(key); msg.className = "msg " + (ok ? "ok" : "err"); };
+
+  // Brevo çift onay mailindeki link buraya ?onay=1 ile döner.
+  if (params.get("onay") === "1") {
+    show("m_confirmed", true);
+    document.getElementById("haber").scrollIntoView();
+  }
+
+  form.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    if (!BREVO_FORM_URL) return show("m_off", false);
+    if (!form.EMAIL.checkValidity()) return show("m_email", false);
+    if (!form.OPT_IN.checked) return show("m_consent", false);
+    if (form.email_address_check.value) return; // bot
+    const btn = form.querySelector("button[type=submit]");
+    btn.disabled = true;
+    try {
+      // Brevo yanıtı başka alan adından geldiği için okunamaz; ağ hatası yoksa gönderilmiş sayılır.
+      await fetch(BREVO_FORM_URL, { method: "POST", mode: "no-cors", body: new FormData(form) });
+      form.reset();
+      show("m_ok", true);
+    } catch (e) {
+      show("m_err", false);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
